@@ -34,6 +34,11 @@ app.use(
     tempFileDir: "/tmp/",
   }),
 );
+
+app.get("/api/health", (_req, res) => {
+  res.status(200).json({ success: true, service: "Job Portal API" });
+});
+
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/job", jobRouter);
 app.use("/api/v1/application", applicationRouter);

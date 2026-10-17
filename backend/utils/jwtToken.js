@@ -13,6 +13,8 @@ export const sendToken = (user, statusCode, res, message) => {
     ),
     httpOnly: true, // Set httpOnly to true
     path: "/",
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
   };
 
   res.status(statusCode).cookie("token", token, options).json({

@@ -3,24 +3,30 @@ import mongoose from "mongoose";
 let connectionPromise = null;
 
 const dbConnection = async () => {
-  if (!process.env.DB_URL) {
-    console.log("Failed to connect DB_URL is not configured");
-    return;
+  const databaseUrl = process.env.DB_URL;
+
+  if (!databaseUrl) {
+    throw new Error("DB_URL is not configured. Add it to backend/.env.");
+  }
+
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
   }
 
   if (!connectionPromise) {
-    connectionPromise = mongoose.connect(process.env.DB_URL, {
-      dbName: "Job_Portal",
-    });
+    connectionPromise = mongoose
+      .connect(databaseUrl, {
+        dbName: "Job_Portal",
+        serverSelectionTimeoutMS: 5000,
+      })
+      .catch((error) => {
+        connectionPromise = null;
+        throw error;
+      });
   }
 
-  try {
-    await connectionPromise;
-    console.log("MongoDB Connected Sucessfully !");
-  } catch (error) {
-    connectionPromise = null;
-    console.log(`Failed to connect ${error.message}`);
-  }
+  await connectionPromise;
+  console.log("MongoDB connected successfully.");
 };
 
 export default dbConnection;
