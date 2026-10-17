@@ -29,12 +29,16 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(async (_req, _res, next) => {
+app.get("/api/health", (_req, res) => {
+  res.status(200).json({ success: true, service: "Job Portal API" });
+});
+
+app.get("/api/health/ready", async (_req, res) => {
   try {
     await dbConnection();
-    next();
+    res.status(200).json({ success: true, service: "Job Portal API", database: "connected" });
   } catch (error) {
-    next(error);
+    res.status(503).json({ success: false, service: "Job Portal API", database: "unavailable" });
   }
 });
 
@@ -45,8 +49,13 @@ app.use(
   }),
 );
 
-app.get("/api/health", (_req, res) => {
-  res.status(200).json({ success: true, service: "Job Portal API" });
+app.use("/api/v1", async (_req, _res, next) => {
+  try {
+    await dbConnection();
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.use("/api/v1/user", userRouter);
