@@ -9,6 +9,7 @@ import cors from "cors";
 import { errorMiddleware } from "./middlewares/error.js";
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
+import dbConnection from "./database/dbConnection.js";
 
 const app = express();
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -27,6 +28,15 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(async (_req, _res, next) => {
+  try {
+    await dbConnection();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 app.use(
   fileUpload({
